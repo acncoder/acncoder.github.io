@@ -1,9 +1,9 @@
-name: Sync from Upstream
+name: Sync from Upstream using PAT
 
 on:
   schedule:
-    - cron: '0 2 * * *'  # 每天 UTC 凌晨2点（北京时间上午10点）
-  workflow_dispatch:     # 也支持手动触发
+    - cron: '0 2 * * *'  # 每天 UTC 凌晨2点
+  workflow_dispatch:
 
 jobs:
   sync:
@@ -18,7 +18,7 @@ jobs:
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
 
-      - name: Add upstream
+      - name: Add upstream and fetch
         run: |
           git remote add upstream https://github.com/ThatCoders/thatcoders.github.io.git
           git fetch upstream
@@ -26,8 +26,10 @@ jobs:
       - name: Merge upstream/master into fork/master
         run: |
           git checkout master
-          git merge upstream/master --allow-unrelated-histories -m "Auto-merge from upstream/master"
+          git merge upstream/master --allow-unrelated-histories -m "Auto-sync from upstream/master"
 
-      - name: Push changes
+      - name: Push changes using PAT
+        env:
+          G_TK: ${{ secrets.G_TK }}
         run: |
-          git push origin master
+          git push https://x-access-token:${G_TK}@github.com/${{ github.repository }}.git master
