@@ -1,0 +1,33 @@
+name: Sync from Upstream
+
+on:
+  schedule:
+    - cron: '0 2 * * *'  # 每天 UTC 凌晨2点（北京时间上午10点）
+  workflow_dispatch:     # 也支持手动触发
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout this fork
+        uses: actions/checkout@v3
+
+      - name: Set Git identity
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@github.com"
+
+      - name: Add upstream
+        run: |
+          git remote add upstream https://github.com/ThatCoders/thatcoders.github.io.git
+          git fetch upstream
+
+      - name: Merge upstream/master into fork/master
+        run: |
+          git checkout master
+          git merge upstream/master --allow-unrelated-histories -m "Auto-merge from upstream/master"
+
+      - name: Push changes
+        run: |
+          git push origin master
