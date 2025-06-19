@@ -1,4 +1,4 @@
-name: Sync from Upstream using G_TK
+name: Sync from Upstream
 
 on:
   schedule:
