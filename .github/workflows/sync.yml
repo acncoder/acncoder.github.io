@@ -2,7 +2,7 @@ name: Sync from Upstream using PAT
 
 on:
   schedule:
-    - cron: '0 2 * * *'  # 每天 UTC 凌晨2点
+    - cron: '0 2 * * *'
   workflow_dispatch:
 
 jobs:
@@ -29,7 +29,6 @@ jobs:
           git merge upstream/master --allow-unrelated-histories -m "Auto-sync from upstream/master"
 
       - name: Push changes using PAT
-        env:
-          G_TK: ${{ secrets.G_TK }}
         run: |
-          git push https://x-access-token:${G_TK}@github.com/${{ github.repository }}.git master
+          git remote set-url origin https://x-access-token:${{ secrets.G_TK }}@github.com/${{ github.repository }}.git
+          git push origin master
