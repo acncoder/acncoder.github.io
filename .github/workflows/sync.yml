@@ -2,7 +2,7 @@ name: Sync from Upstream
 
 on:
   schedule:
-    - cron: '0 6,12,18,2 * * *'
+    - cron: '0 6,12,18,2 * * *'  # 每天 6/12/18/2 点 UTC 自动同步
   workflow_dispatch:
 
 jobs:
@@ -10,30 +10,25 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout with G_TK
+      - name: Clone forked repo with G_TK
         run: |
           git clone https://x-access-token:${{ secrets.G_TK }}@github.com/${{ github.repository }}.git repo
           cd repo
           git config user.name "github-actions"
           git config user.email "github-actions@github.com"
 
-      - name: Add upstream and fetch
+      - name: Add upstream and reset to upstream/master
         run: |
           cd repo
           git remote add upstream https://github.com/ThatCoders/thatcoders.github.io.git
           git fetch upstream
+          git checkout -B master upstream/master
 
-      - name: Merge upstream/master into fork/master
+      - name: Force push master to origin using G_TK
         run: |
           cd repo
-          git checkout master
-          git merge upstream/master --allow-unrelated-histories -m "Auto-sync from upstream/master"
+          git push -f https://x-access-token:${{ secrets.G_TK }}@github.com/${{ github.repository }}.git master
 
-      - name: Push changes using G_TK
-        run: |
-          cd repo
-          git push https://x-access-token:${{ secrets.G_TK }}@github.com/${{ github.repository }}.git master
       - name: Trigger Vercel Deploy Hook
         run: |
           curl -X POST "https://api.vercel.com/v1/integrations/deploy/prj_VvQVpEZ8EmNAx5wmyraBZloThrzx/ChMfH5aEg7"
-
